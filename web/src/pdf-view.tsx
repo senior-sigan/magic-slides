@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { clamp } from "./math-utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
@@ -17,15 +18,15 @@ export function PdfView(props: Props) {
     setNumPages(numPages);
   }
 
-  const pageNumber = () => numPages ? props.page % numPages : 0;
+  const pageNumber = numPages ? clamp(props.page, 1, numPages) : 0;
 
   return (
     <div>
       <Document file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
-        <Page renderTextLayer={false} pageNumber={pageNumber()} />
+        <Page renderTextLayer={false} pageNumber={pageNumber} />
       </Document>
       <p>
-        Page {pageNumber()} of {numPages}
+        Page {pageNumber} of {numPages}
       </p>
     </div>
   );

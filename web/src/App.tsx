@@ -2,6 +2,7 @@ import useWebSocket from 'react-use-websocket';
 import {QRCodeSVG} from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { PdfView } from './pdf-view';
+import { clamp } from './math-utils';
 
 // FIXME: read ws server from env
 const socketUrl = 'ws://localhost:5173/ws';
@@ -15,7 +16,6 @@ function App() {
   const {lastMessage, readyState} = useWebSocket(socketUrl);
   const [code, setCode] = useState<string|null>(null);
   const [pageNumber, setPageNumber] = useState(0);
-  const [show, setShow] = useState(false);
 
   useEffect(()=>{
     if (lastMessage) {
@@ -24,14 +24,13 @@ function App() {
         setCode(data.data.code);
       } else if (data.type === 'start') {
         console.log('Start!');
-        setShow(true);
+        setPageNumber(1);
       } else if (data.type === 'next') {
         console.log('NEXT');
         setPageNumber(pageNumber + 1);
       } else if (data.type === 'prev') {
         console.log('PREV'); 
-        const pn = pageNumber - 1;
-        setPageNumber(pn > 0 ? pn : 0);
+        setPageNumber(clamp(pageNumber - 1, 1));
       } else {
         console.warn('Unknown message', lastMessage.data);
       }
@@ -43,10 +42,13 @@ function App() {
   return notReady ? 
     <p>Loading</p>
     : 
-    show ? 
+    pageNumber > 0 ? 
     <PdfView page={pageNumber} file='/media/example.pdf' />
     :
-    <QRCodeSVG value={qrCodeStr(code)} />;
+    <div>
+      <QRCodeSVG value={qrCodeStr(code)} />
+      <p>{code}</p>
+    </div>;
 }
 
 export default App
