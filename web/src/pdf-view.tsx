@@ -7,23 +7,25 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 interface Props {
   file: string;
+  page: number;
 }
 
 export function PdfView(props: Props) {
   const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
   }
 
+  const pageNumber = () => numPages ? props.page % numPages : 0;
+
   return (
     <div>
       <Document file={props.file} onLoadSuccess={onDocumentLoadSuccess}>
-        <Page renderTextLayer={false} pageNumber={pageNumber} />
+        <Page renderTextLayer={false} pageNumber={pageNumber()} />
       </Document>
       <p>
-        Page {pageNumber} of {numPages}
+        Page {pageNumber()} of {numPages}
       </p>
     </div>
   );

@@ -6,24 +6,47 @@ import { PdfView } from './pdf-view';
 // FIXME: read ws server from env
 const socketUrl = 'ws://localhost:5173/ws';
 
+function qrCodeStr(code: string) {
+  return `slides://${code}`;
+}
+
+
 function App() {
-  const {sendMessage, lastMessage, readyState} = useWebSocket(socketUrl);
+  const {lastMessage, readyState} = useWebSocket(socketUrl);
   const [code, setCode] = useState<string|null>(null);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [show, setShow] = useState(false);
 
   useEffect(()=>{
     if (lastMessage) {
-      console.log(lastMessage);
       const data = (JSON.parse(lastMessage.data));
       if (data.type=== 'session_code') {
         setCode(data.data.code);
+      } else if (data.type === 'start') {
+        console.log('Start!');
+        setShow(true);
+      } else if (data.type === 'next') {
+        console.log('NEXT');
+        setPageNumber(pageNumber + 1);
+      } else if (data.type === 'prev') {
+        console.log('PREV'); 
+        const pn = pageNumber - 1;
+        setPageNumber(pn > 0 ? pn : 0);
+      } else {
+        console.warn('Unknown message', lastMessage.data);
       }
     }
   }, [lastMessage, setCode]);
 
-  return <div>
-    {((readyState != 1) || !code) ? <p>Loading</p> : <QRCodeSVG value={code}></QRCodeSVG>}
-    <PdfView file='/media/example.pdf'></PdfView>
-  </div>
+  const notReady = (readyState != 1 || !code);
+
+  return notReady ? 
+    <p>Loading</p>
+    : 
+    show ? 
+    <PdfView page={pageNumber} file='/media/example.pdf' />
+    :
+    <QRCodeSVG value={qrCodeStr(code)} />;
 }
 
 export default App

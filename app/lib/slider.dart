@@ -22,14 +22,14 @@ class _SliderPageState extends State<SliderPage> {
           children: [
             CupertinoButton.filled(
               onPressed: () {
-                var res = dio.post("/api/next", data: {'code': widget.code});
+                var res = dio.post("/api/next", data: {"code": widget.code});
                 res.then((value) => debugPrint("onNext: ${value.statusCode} ${value.data}"));
               },
               child: const Text("Prev"),
             ),
             CupertinoButton.filled(
               onPressed: () {
-                var res = dio.post("/api/prev", data: {'code': widget.code});
+                var res = dio.post("/api/prev", data: {"code": widget.code});
                 res.then((value) => debugPrint("onNext: ${value.statusCode} ${value.data}"));
               },
               child: const Text("Next"),

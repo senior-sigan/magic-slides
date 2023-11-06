@@ -22,7 +22,7 @@ class QRCodePage extends StatelessWidget {
           if (value != null && value.startsWith(prefix)) {
             var code = value.substring(prefix.length);
             debugPrint('Barcode found! $code');  
-            var res = dio.post("/api/start", data: {code: code});
+            var res = dio.post("/api/start", data: {"code": code});
             res.then((value) {
                 debugPrint("onStart");
                 Navigator.push(
